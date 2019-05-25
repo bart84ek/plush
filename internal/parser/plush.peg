@@ -1,0 +1,37 @@
+{
+  package parser
+
+  import (
+      "fmt"
+      "github.com/gobuffalo/lush/ast"
+  )
+
+	var bb = &bytes.Buffer{}
+}
+
+DOC <- stmts:(_ STATEMENT _)+ EOF {
+  return toScript(stmts)
+}
+
+STATEMENT <- (LUSHP / LUSHS / HTML )
+
+LUSHP <-  "<%"("=")? _ x:(!"%>" .)+ _ ("-")? "%>"  {
+  return newLushP(x)
+}
+
+LUSHS <-  "<%" _ x:(!"%>" .)+ _ "%>" _ {
+	return newLushS(x)
+}
+
+HTML <- _ (!"<%" .)+ _ {
+	return html(c.text)
+}
+
+_ "whitespace" ← [ \t\r\n]* {
+  return "", nil
+}
+
+EOF <- !. {
+  return "", nil
+}
+
